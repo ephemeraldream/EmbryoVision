@@ -23,21 +23,20 @@ class LoadData:
         classification_tensor = None
         f = open("C:\\Work\\EmbryoVision\\data\\labels\\raw_labels.json")
         data = json.load(f)
-        x = data[0]['id']
-        for i in range(1000):
+        for i in range(5):
             cls_added = torch.tensor([data[i]['id'], data[i]['id'], data[i]['id'], data[i]['id'], data[i]['id']])
             reg_added = torch.tensor([data[i]['id'], data[i]['id']])
             annotation = data[i]['annotations'][0]['result'][0]
             choices = annotation['value'].get('choices', [])
             if 'Z' in choices:
-                zero_tensor, cls_zero_tensor = torch.zeros([26, 2]), torch.zeros([26, 5])
-                zero_tensor[25, :], cls_zero_tensor[25, :] = reg_added, cls_added
+                zero_tensor, cls_zero_tensor = torch.zeros([26, 2, 1]), torch.zeros([26, 5, 1])
+                zero_tensor[25, :, 0], cls_zero_tensor[25, :, 0] = reg_added, cls_added
                 if regression_tensor is None:
                     classification_tensor = torch.zeros([26, 5,1])
                     regression_tensor = torch.zeros([26, 2,1])
                 else:
-                    classification_tensor = torch.stack((classification_tensor, cls_zero_tensor), dim=2)
-                    regression_tensor = torch.stack((regression_tensor, zero_tensor), dim=2)
+                    classification_tensor = torch.cat((classification_tensor, cls_zero_tensor), dim=2)
+                    regression_tensor = torch.cat((regression_tensor, zero_tensor), dim=2)
 
             else:
                 reg_tensor_to_fill = torch.zeros([26, 2])
@@ -63,17 +62,22 @@ class LoadData:
                         continue
                     else:
                         choices = item['value'].get('choices', [])
-                        cls_to_add = LoadData.get_from_choice(choices)
-                        cls_to_add = torch.tensor(cls_to_add)
-                        cls_tensor_to_fill[count, :] = cls_to_add
-                        reg_to_add = torch.tensor([item['value']['x'], item['value']['y']])
-                        reg_tensor_to_fill[count, :] = reg_to_add
-                        count += 1
+                        if "U" in choices:
+                            continue
+                        else:
+                            choices = item['value'].get('choices', [])
+                            cls_to_add = LoadData.get_from_choice(choices)
+                            cls_to_add = torch.tensor(cls_to_add)
+                            cls_tensor_to_fill[count, :] = cls_to_add
+                            reg_to_add = torch.tensor([item['value']['x'], item['value']['y']])
+                            reg_tensor_to_fill[count, :] = reg_to_add
+                            count += 1
                 reg_tensor_to_fill = torch.unsqueeze(reg_tensor_to_fill, 2)
                 cls_tensor_to_fill = torch.unsqueeze(cls_tensor_to_fill, 2)
                 regression_tensor = torch.cat((regression_tensor, reg_tensor_to_fill), dim=2)
                 classification_tensor = torch.cat((classification_tensor, cls_tensor_to_fill), dim=2)
 
+        x = 2
         result = LoadData.concat_two_tensors(regression_tensor, classification_tensor)
         torch.save(result, "C:\\Work\\EmbryoVision\\data\\torch_type\\first_pack_labels")
 
@@ -94,12 +98,16 @@ class LoadData:
         Just casually concatenate two tensors with
         respect of saving ids.
         """
-        tensor1_without_last = tz1[:-1, :]
-        tensor2_without_last = tz2[:-1, :]
-        combined_without_last = torch.cat((tensor1_without_last, tensor2_without_last), dim=1)
-        last_row_combined = torch.cat((tz1[-1, :], tz2[-1, :]), dim=0).unsqueeze(0)
-        combined_with_last = torch.cat((combined_without_last, last_row_combined), dim=0)
-        return torch.cat((combined_with_last, tz1[1:, :], tz2[1:, :]), dim=0)
+        tensor1_without_last = tz1[:-1, :,:]
+        tensor2_without_last = tz2[:-1, :,:]
+        last_row1 = tz1[-1,:,:]
+        last_row2 = tz2[-1,:,:]
+        combined_last_row = torch.cat((tz1[-1,:,:], tz2[-1,:,:]), dim=0)
+        combined_last_row = torch.unsqueeze(combined_last_row, 0)
+        combined_no_last_row = torch.cat((tensor1_without_last, tensor2_without_last), dim=1)
+        result = torch.concat((combined_no_last_row, combined_last_row), dim=0)
+        x = 2
+        return result
 
     @staticmethod
     def get_from_choice(choices: List) -> List:
