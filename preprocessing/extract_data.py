@@ -2,40 +2,80 @@ import torch
 import torchvision
 import os
 import json
-
+from itertools import tee, islice, chain
+from typing import Any, List, Union
 
 class LoadData:
+
+    @staticmethod
+    def previous_and_next(some_iterable):
+        prevs, items, nexts = tee(some_iterable, 3)
+        prevs = chain([None], prevs)
+        nexts = chain(islice(nexts, 1, None), [None])
+        return zip(prevs, items, nexts)
+
     def __init__(self):
         pass
 
     @staticmethod
     def extract_labels():
-        regression_tensor = torch.tensor([])
+        regression_tensor = None
+        classification_tensor = None
         f = open("C:\\Work\\EmbryoVision\\data\\labels\\raw_labels.json")
         data = json.load(f)
+        x = data[0]['id']
         for i in range(1000):
-            z = data[i]
-            if 'choices' in data[i]['annotations'][0]['result'][0]['value'].keys():
-                x = data[i]['annotations'][0]['result'][0]['value']
-                if data[i]['annotations'][0]['result'][0]['value']['choices'][0] == 'Z':
-                    zero_tensor = torch.zeros([26,2])
-                    added = torch.tensor([data[i]['id'], data[i]['id']])
-                    zero_tensor[25,:] = added
-                    regression_tensor = torch.cat((regression_tensor,zero_tensor))
+            cls_added = torch.tensor([data[i]['id'], data[i]['id'], data[i]['id'], data[i]['id'], data[i]['id']])
+            reg_added = torch.tensor([data[i]['id'], data[i]['id']])
+            annotation = data[i]['annotations'][0]['result'][0]
+            choices = annotation['value'].get('choices', [])
+            if 'Z' in choices:
+                zero_tensor, cls_zero_tensor = torch.zeros([26, 2]), torch.zeros([26, 5])
+                zero_tensor[25, :], cls_zero_tensor[25, :] = reg_added, cls_added
+                if regression_tensor is None:
+                    classification_tensor = torch.zeros([26, 5,1])
+                    regression_tensor = torch.zeros([26, 2,1])
+                else:
+                    classification_tensor = torch.stack((classification_tensor, cls_zero_tensor), dim=2)
+                    regression_tensor = torch.stack((regression_tensor, zero_tensor), dim=2)
 
             else:
-                added = torch.tensor([data[i]['id'], data[i]['id']])
-                tensor_to_fill = torch.zeros([26,2])
+                reg_tensor_to_fill = torch.zeros([26, 2])
+                cls_tensor_to_fill = torch.zeros([26, 5])
+                cls_tensor_to_fill[:, 4] = 1
                 count = 0
-                tensor_to_fill[25,:] = added
-                for labs in data[i]['annotations'][0]['result']:
-                    if 'choices' not in labs['value'].keys():
-                        to_add = torch.tensor([labs['value']['x'], labs['value']['y']])
-                        tensor_to_fill[count,:] = to_add
-                        count += 1
-                regression_tensor = torch.cat((regression_tensor,tensor_to_fill))
+                reg_tensor_to_fill[25, :] = reg_added
+                cls_tensor_to_fill[25, :] = cls_added
 
-        torch.save(regression_tensor, "C:\\Work\\EmbryoVision\\data\\torch_type\\first_pack_labels")
+                for previous, item, next in LoadData.previous_and_next(data[i]['annotations'][0]['result']):
+                    if next is None:
+                        choices = item['value'].get('choices', [])
+                        if "U" in choices:
+                            continue
+                        else:
+                            to_add = torch.tensor([item['value']['x'], item['value']['y']])
+                            cls_to_add = LoadData.get_from_choice(choices)
+                            cls_to_add = torch.tensor(cls_to_add)
+                            cls_tensor_to_fill[count, :] = cls_to_add
+                            reg_tensor_to_fill[count, :] = to_add
+                            count += 1
+                    elif item['id'] == next['id']:
+                        continue
+                    else:
+                        choices = item['value'].get('choices', [])
+                        cls_to_add = LoadData.get_from_choice(choices)
+                        cls_to_add = torch.tensor(cls_to_add)
+                        cls_tensor_to_fill[count, :] = cls_to_add
+                        reg_to_add = torch.tensor([item['value']['x'], item['value']['y']])
+                        reg_tensor_to_fill[count, :] = reg_to_add
+                        count += 1
+                reg_tensor_to_fill = torch.unsqueeze(reg_tensor_to_fill, 2)
+                cls_tensor_to_fill = torch.unsqueeze(cls_tensor_to_fill, 2)
+                regression_tensor = torch.cat((regression_tensor, reg_tensor_to_fill), dim=2)
+                classification_tensor = torch.cat((classification_tensor, cls_tensor_to_fill), dim=2)
+
+        result = LoadData.concat_two_tensors(regression_tensor, classification_tensor)
+        torch.save(result, "C:\\Work\\EmbryoVision\\data\\torch_type\\first_pack_labels")
 
     @staticmethod
     def extract_images(directory_in_str):
@@ -47,6 +87,31 @@ class LoadData:
             img = torchvision.io.read_image(filename_torch)
             dir_of_images[raw_filename] = img
         torch.save(directory_in_str, "C:\\Work\\EmbryoVision\\data\\torch_type\\first_pack")
+
+    @staticmethod
+    def concat_two_tensors(tz1: torch.Tensor, tz2: torch.Tensor) -> torch.Tensor:
+        """
+        Just casually concatenate two tensors with
+        respect of saving ids.
+        """
+        tensor1_without_last = tz1[:-1, :]
+        tensor2_without_last = tz2[:-1, :]
+        combined_without_last = torch.cat((tensor1_without_last, tensor2_without_last), dim=1)
+        last_row_combined = torch.cat((tz1[-1, :], tz2[-1, :]), dim=0).unsqueeze(0)
+        combined_with_last = torch.cat((combined_without_last, last_row_combined), dim=0)
+        return torch.cat((combined_with_last, tz1[1:, :], tz2[1:, :]), dim=0)
+
+    @staticmethod
+    def get_from_choice(choices: List) -> List:
+        if not choices:
+            cls_to_add = [1, 0, 0, 0, 0]
+        elif 'E' in choices and 'B' not in choices:
+            cls_to_add = [0, 1, 0, 0, 0]
+        elif 'E' in choices and 'B' in choices:
+            cls_to_add = [0, 0, 1, 0, 0]
+        else:
+            cls_to_add = [0, 0, 0, 1, 0]
+        return cls_to_add
 
 
 def main():
