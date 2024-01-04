@@ -18,6 +18,5 @@ class CombinedLoss(nn.Module):
     def forward(self, reg_preds, reg_labs, clas_preds, clas_labs):
         reg_loss = self.MSE(reg_preds, reg_labs)
         clas_loss = self.CEL(clas_preds, clas_labs)
-        combined_loss = reg_loss * self.lam + (1 - self.lam) * clas_loss
-
+        combined_loss = (reg_loss.item() * self.lam) + ((1 - self.lam) * clas_loss.item())
         return combined_loss
