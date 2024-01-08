@@ -1,7 +1,10 @@
 from torch.utils.data import DataLoader, Subset, random_split
 from EmbryoVision.preprocessing.dataset_creation import EmbryoImageDataset
+from torch.nn.functional import one_hot as hot
 from torchvision.transforms import v2
 from cnn_model import EmbryoModel
+from EmbryoVision.utils import EarlyStopping
+from EmbryoVision.utils.tools import Tools
 from loss import CombinedLoss
 import torch
 
@@ -9,6 +12,7 @@ import torch
 class Trainer:
     def __init__(self):
         self.dataset = torch.load("C:\\Work\\EmbryoVision\\data\\torch_type\\first_dataset")
+        self.tools = Tools()
         self.indices = torch.randperm(len(self.dataset)).tolist()
         self.num_batches = 16
         self.shuffled_dataset = Subset(self.dataset, self.indices)
@@ -35,7 +39,7 @@ class Trainer:
             reg_pred, cls_pred = self.model(images.to(self.device))
             MSE = self.MSE(reg_pred, labels[0].to(self.device))
             CEL = self.CEL(cls_pred, labels[1].to(self.device))
-            x = torch.argmax(cls_pred, dim=2)
+
             print("Losses are loaded.")
 
             self.optimizer.zero_grad()
@@ -45,14 +49,15 @@ class Trainer:
             print("CEL counted")
             self.optimizer.step()
 
+            cls_loss = self.tools.compute_preds(cls_pred, labels)
             print("MSE Current: " + str(float(MSE)))
-            print("CEL Current: " + str(float(CEL)))
+            print("CEL Current: " + str(float(cls_loss)))
             train_loss += (MSE + CEL)
             print(train_loss)
 
         train_loss /= self.num_batches
         print(f"Train loss: {train_loss:>8f}")
-
+        torch.save(self.model.state_dict(), "C:\\Work\\EmbryoVision\\data\\torch_type\\saved_model")
         return train_loss
 
     @staticmethod
