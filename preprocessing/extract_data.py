@@ -20,6 +20,7 @@ class LoadData:
 
     @staticmethod
     def extract_labels():
+        holes_tensor = None
         regression_tensor = None
         classification_tensor = None
         f = open("C:\\Work\\EmbryoVision\\data\\labels\\new_labels.json")
@@ -31,8 +32,6 @@ class LoadData:
                 cls_idx = torch.tensor([idx, idx, idx, idx, idx])
                 reg_idx = torch.tensor([idx, idx])
                 hole_idx = torch.tensor([idx])
-                hole_tensor_to_fill = torch.zeros([26, 1])
-                hole_tensor_to_fill[25, :] = hole_idx
                 try:
                     annotation = data[i]['annotations'][0]['result'][0]
                     choices = annotation['value'].get('choices', [])
@@ -40,14 +39,17 @@ class LoadData:
                         hole_tensor_to_fill = torch.ones([26,1])
                         hole_tensor_to_fill[25, :] = hole_idx
                     if 'Z' in choices:
-                        zero_tensor, cls_zero_tensor = torch.zeros([26, 2, 1]), torch.zeros([26, 5, 1])
-                        zero_tensor[25, :, 0], cls_zero_tensor[25, :, 0] = reg_idx, cls_idx
+                        zero_tensor, cls_zero_tensor, zero_holes_tensor = torch.zeros([26, 2, 1]), torch.zeros([26, 5, 1]), torch.zeros([26,1,1])
+                        zero_tensor[25, :, 0], cls_zero_tensor[25, :, 0], zero_holes_tensor[25, :, 0] = reg_idx, cls_idx, hole_idx
+                        zero_holes_tensor[25, :, 0] = hole_idx
                         if regression_tensor is None:
                             classification_tensor = torch.zeros([26, 5, 1])
                             regression_tensor = torch.zeros([26, 2, 1])
+                            holes_tensor = torch.zeros([26,1,1])
                         else:
                             classification_tensor = torch.cat((classification_tensor, cls_zero_tensor), dim=2)
                             regression_tensor = torch.cat((regression_tensor, zero_tensor), dim=2)
+                            holes_tensor = torch.cat((holes_tensor, zero_holes_tensor), dim=2)
                     else:
                         reg_tensor_to_fill = torch.zeros([26, 2])
                         cls_tensor_to_fill = torch.zeros([26, 5])
@@ -85,18 +87,23 @@ class LoadData:
                                     cls_tensor_to_fill[count, :] = cls_to_add
                                     reg_to_add = torch.tensor([item['value']['x'], item['value']['y']])
                                     reg_tensor_to_fill[count, :] = reg_to_add
+
                                     count += 1
                         reg_tensor_to_fill = torch.unsqueeze(reg_tensor_to_fill, 2)
                         cls_tensor_to_fill = torch.unsqueeze(cls_tensor_to_fill, 2)
+                        hole_tensor_to_fill = torch.unsqueeze(hole_tensor_to_fill, 2)
                         regression_tensor = torch.cat((regression_tensor, reg_tensor_to_fill), dim=2)
                         classification_tensor = torch.cat((classification_tensor, cls_tensor_to_fill), dim=2)
+                        holes_tensor = torch.cat((holes_tensor, hole_tensor_to_fill), dim=2)
+
                 except IndexError:
                     continue
             else:
                 continue
 
         x = 2
-        result = (Tools.concat_two_tensors(regression_tensor, classification_tensor))
+        result = Tools.concat_two_tensors(regression_tensor, classification_tensor)
+        result = Tools.concat_two_tensors(result, holes_tensor)
         torch.save(result, "C:\\Work\\EmbryoVision\\data\\torch_type\\first_pack_labels")
 
     @staticmethod
@@ -109,8 +116,6 @@ class LoadData:
             img = torchvision.io.read_image(filename_torch)
             dir_of_images[raw_filename] = img
         torch.save(dir_of_images, "C:\\Work\\EmbryoVision\\data\\torch_type\\first_pack")
-
-
 
     @staticmethod
     def get_from_choice(choices: List) -> List:

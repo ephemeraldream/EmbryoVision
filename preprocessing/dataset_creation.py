@@ -21,6 +21,7 @@ class EmbryoImageDataset(torch.utils.data.Dataset):
         img_id = self.ids[idx].item()
         image = self.images_dict[str(img_id)] / 255
         cls_label = self.labels_tensor[:25, 2:, idx]
+        hole_label = self.labels_tensor[0, -1, idx]
         reg_label = self.labels_tensor[:25, :2, idx]/255
         #matplotlib.pyplot.imshow(torch.permute(image, (1,2,0)))
         #matplotlib.pyplot.show()
@@ -31,7 +32,7 @@ class EmbryoImageDataset(torch.utils.data.Dataset):
         #    image = self.transforms(image)
         #    label[:24,2:] = self.transforms(label[:24,2:])
 
-        return image, (reg_label, cls_label)
+        return image, (reg_label, cls_label, hole_label)
 
 
 #images_dict = torch.load("C:\\Work\\EmbryoVision\\data\\torch_type\\first_pack")
