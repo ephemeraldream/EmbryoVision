@@ -6,6 +6,10 @@ from torch import Tensor
 
 
 class EmbryoModel(nn.Module):
+    """
+    This is a classical CNN model that eventually splits in two,
+    fully connected branches to perform multitasking.
+    """
 
     def __init__(self):
         super(EmbryoModel, self).__init__()

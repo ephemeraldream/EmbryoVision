@@ -93,7 +93,7 @@ class Trainer:
                 #print("BCE Current: " + str(float(BCE)))
                 test_loss += cls_loss
                 count += 1
-                print("Overall Train Loss: " + str(test_loss / count))
+                print("Overall Test Loss: " + str(test_loss / count))
 
 
 
@@ -112,7 +112,7 @@ class Trainer:
             print(f"The train error for {i} epoch' is :" + str(train_error))
             test_error = self.test_loop()
             test_error_list.append(test_error)
-            print(f"The train error for {i} epoch' is :" + str(test_error))
+            print(f"The test error for {i} epoch' is :" + str(test_error))
 
             if test_error > test_error_list[-1]: count += 1
             if count >= 3: break
@@ -120,10 +120,6 @@ class Trainer:
         torch.save(train_error_list, "C:\\Work\\EmbryoVision\\data\\torch_type\\train_list")
         torch.save(test_error_list, "C:\\Work\\EmbryoVision\\data\\torch_type\\test_list")
         torch.save(self.cnn_model.state_dict(), "C:\\Work\\EmbryoVision\\data\\torch_type\\final_cnn_model")
-
-
-
-
 
     @staticmethod
     def main():
