@@ -18,9 +18,9 @@ class EmbryoImageDataset(torch.utils.data.Dataset):
         return len(self.ids)
 
     def __getitem__(self, idx):
-        img_id = self.ids[idx].item()
+        img_id = self.ids[idx]
         image = self.images_dict[str(img_id)] / 255
-        cls_label = self.labels_tensor[:25, 2:, idx]
+        cls_label = self.labels_tensor[:25, 2:-1, idx]
         hole_label = self.labels_tensor[0, -1, idx]
         reg_label = self.labels_tensor[:25, :2, idx]/255
         #matplotlib.pyplot.imshow(torch.permute(image, (1,2,0)))

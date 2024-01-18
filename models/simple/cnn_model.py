@@ -17,6 +17,9 @@ class EmbryoModel(nn.Module):
         self.reg2 = nn.Linear(in_features=512, out_features=50)
         self.cls1 = nn.Linear(in_features=35840, out_features=512)
         self.cls2 = nn.Linear(in_features=512, out_features=25 * 5)
+        self.hole1 = nn.Linear(in_features=35840, out_features=100)
+        self.hole2 = nn.Linear(in_features=100, out_features=1)
+        self.hole3 = nn.Sigmoid()
 
     def forward(self, X):
         X = self.pooling(func.relu(self.conv1(X)))
@@ -32,4 +35,8 @@ class EmbryoModel(nn.Module):
         cls = func.relu(self.cls1(X))
         cls = self.cls2(cls)
         cls = cls.view(-1, 25, 5)
-        return reg, cls
+
+        hole = func.relu(self.hole1(X))
+        hole = self.hole2(hole)
+        hole = self.hole3(hole)
+        return reg, cls, hole
