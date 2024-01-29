@@ -1,12 +1,17 @@
 from django.shortcuts import render
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
+import torchvision
+import torch
+import torchvision.transforms as tf
 import datetime
 
 from django.views.decorators.csrf import csrf_exempt
 from .models import Image
 
+
 def index(request):
     return HttpResponse("Hello, world. You're at the polls index.")
+
 
 @csrf_exempt
 def upload_image(request):
@@ -23,11 +28,14 @@ def upload_image(request):
 
 @csrf_exempt
 def start_neural_network(request):
+    model = torch.load('C:\\Work\\EmbryoVision\\data\\torch_type\\saved_model')
+    model.eval()
+
     if request.method == 'POST':
-        return HttpResponse("Neural network started.")
+        return JsonResponse({})
 
 
 @csrf_exempt
 def put_labels(request):
     if request.method == 'POST':
-        return HttpResponse("Labels put on the image.")
+        return JsonResponse({'message': "Labels put on the image", 'labels': ""})
