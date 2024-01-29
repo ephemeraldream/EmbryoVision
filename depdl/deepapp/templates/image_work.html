@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Image Upload</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            background-image: url('../../static/bg.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            height: 100vh;
+            padding-left: 10%;
+        }
+        .container {
+            background-color: honeydew;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 100%;
+            margin-right: auto;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        input[type="file"] {
+            border: 1px solid #ccc;
+            display: block;
+            padding: 6px;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        button {
+            background-color: #5c6bc0;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #3f51b5;
+        }
+        img {
+            /*max-width: 180%;*/
+            /*max-height: 180px;*/
+
+            display: block;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Upload an Image</h1>
+        <form action="{% url 'deepapp:upload_image' %}" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="file" name="image" accept="image/*" required>
+            <button type="submit">Upload Image</button>
+        </form>
+
+        {% if image_url %}
+            <h2>Uploaded Image:</h2>
+            <img src="{{ image_url }}" alt="Uploaded Image">
+        {% endif %}
+
+        <h2>Actions</h2>
+        <form action="{% url 'deepapp:start_neural_network' %}" method="post">
+            {% csrf_token %}
+            <button type="submit">Start Neural Network</button>
+        </form>
+
+        <form action="{% url 'deepapp:put_labels' %}" method="post">
+            {% csrf_token %}
+            <button type="submit">Put Labels in the Current Image</button>
+        </form>
+    </div>
+</body>
+</html>
