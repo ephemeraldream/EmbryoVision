@@ -27,8 +27,10 @@ function putLabels() {
     })
     .then(response => response.json())
     .then(data => {
-
         console.log(data);
+        if (data){
+            document.getElementById('predictions-container').innerText = data
+        }
     })
     .catch(error => console.error('Error:', error));
 }
@@ -45,4 +47,7 @@ function getCookie(name) {
         }
     }
     return cookieValue;
+}
+function test() {
+  document.getElementById("trash").innerHTML = "Hello World";
 }

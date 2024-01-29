@@ -1,4 +1,7 @@
 <!DOCTYPE html>
+
+{% load static %}
+
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -88,20 +91,70 @@
             {% endif %}
 
             <h2>Actions</h2>
+
             <button onclick="startNeuralNetwork()">Start Neural Network</button>
             <button onclick="putLabels()">Put Labels Over the Image</button>
 
         </div>
         <div class="predictions-container">
-            <h1>Helllo</h1><!-- This container will display the predictions -->
-            {% if predictions %}
-                <h2>Predictions:</h2>
-                <!-- Display predictions here -->
-                {% for prediction in predictions %}
-                    <p>{{ prediction }}</p>
-                {% endfor %}
-            {% endif %}
+            <h1 id="trash">Hello</h1><!-- This container will display the predictions -->
+            <div id="predictions-container">
+
+            </div>
         </div>
     </div>
+    <script>
+function startNeuralNetwork(){
+
+    fetch("{% url 'deepapp:start_neural_network' %}", {
+        method:"POST",
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({})
+    })
+        .then((response => response.json()))
+        .then((data => {
+            console.log(data)
+        }))
+        .catch(error => console.error('We have an ERROR', error));
+}
+function putLabels() {
+    fetch("{% url 'deepapp:put_labels' %}", {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({})
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log(data);
+        if (data){
+            document.getElementById('predictions-container').innerText = data
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+function test() {
+  document.getElementById("trash").innerHTML = "Hello World";
+}
+    </script>
 </body>
 </html>

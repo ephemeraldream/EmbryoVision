@@ -20,4 +20,6 @@ class Choice(models.Model):
 
 class Image(models.Model):
     image = models.ImageField(upload_to='images/')
+    objects = models.Manager()
+
 
