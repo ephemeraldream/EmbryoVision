@@ -8,7 +8,7 @@ In the realm of contemporary medical Data Science, the project at hand stands at
 
 Embryological labs, inundated with image data, stand to benefit immensely from our automated detection and classification system. By streamlining the analysis process, we empower embryologists to direct their expertise where it matters most, enhancing patient outcomes and advancing medical imaging.
 
-![Embryological Image](https://example.com/embryological-image.jpg)
+![Embryological Image](https://github.com/ephemeraldream/EmbryoVision/blob/main/utils/photo_2024-01-29_23-29-05.jpg)
 
 ## Project Overview
 
@@ -16,9 +16,13 @@ Our proprietary dataset, sourced directly from a Russian embryological lab, pres
 
 The MODCNN's design is tailored to embryological image analysis, diverging into specialized branches for detection and classification. We also experiment with YOLOv7's real-time object detection and the potential of transformer-based models known for capturing complex data patterns.
 
+![Embryological Image](https://github.com/ephemeraldream/EmbryoVision/blob/main/utils/photo_2024-01-29_23-29-05.jpg)
+
 ## Materials and Methods
 
 Development takes place in the laboratory of LLC "WESTTRADE LTD". The raw data collection was conducted in the ART (Assisted Reproductive Technologies) laboratory of the "Family" medical center (Ufa, Russia). The visual information on the preimplantation development of human embryos up to the blastocyst stage (0–6 days post-insemination) was obtained using the "EmbryoViewer" incubator with a time-lapse video recording system (LLC "WESTTRADE LTD", Russia). Embryo cultivation was performed individually in special WOW dish microwells (Vitrolife, Sweden and VivaVitro, China). The dataset was labeled using Label Studio Community Edition software. A recurrent convolutional neural network architecture was selected, and the model was trained on numerous images.
+
+![Embryological Image](https://github.com/ephemeraldream/EmbryoVision/blob/main/utils/photo_2024-01-29_23-29-05.jpg)
 
 ## Discussion
 
