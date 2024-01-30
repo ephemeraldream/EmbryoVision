@@ -35,7 +35,7 @@ The prototype system for comparative assessment of implantation potential was de
 ## Technologies Used
 
 - **PyTorch**: For building and training neural networks.
-- **Django + Svelte JS**: For deploying the web application that interfaces with the neural network models.
+- **Django + REST API + Svelte JS + Docker**: For deploying the web application that interfaces with the neural network models.
 
 ## Contact
 
