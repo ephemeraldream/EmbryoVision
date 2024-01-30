@@ -23,12 +23,12 @@
             padding-left: 10%;
         }
         .main-container {
-            display: flex; /* Use flexbox to layout the containers */
+            display: flex;
             justify-content: flex-start;
             align-items: flex-start;
-            width: 80%; /* Adjust the width as needed */
+            width: 80%;
         }
-        .container, .predictions-container {
+        .container {
             background-color: honeydew;
             padding: 20px;
             border-radius: 8px;
@@ -40,6 +40,40 @@
 
             margin-right: auto;
         }
+            .predictions-container {
+            background-color: #f5f5f7;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333;
+            border-left: 5px solid #007bff;
+        }
+                .predictions-container h1 {
+            text-align: center;
+            color: #007bff;
+            margin-bottom: 30px;
+        }
+
+        .predictions-container p {
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .predictions-container span {
+            font-weight: bold;
+            display: inline-block;
+            margin-left: 10px;
+            background-color: #e9ecef;
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        .predictions-container span:hover {
+            background-color: #dfe4ea;
+        }
+
 
         h1, h2 {
             color: #333;
@@ -67,8 +101,7 @@
             background-color: #3f51b5;
         }
         img {
-            /*max-width: 180%;*/
-            /*max-height: 180px;*/
+
 
             display: block;
             margin: 0 auto;
@@ -97,7 +130,10 @@
 
         </div>
         <div class="predictions-container">
-            <h1 id="trash">Hello</h1><!-- This container will display the predictions -->
+            <h1 id="trash">Predictions</h1><!-- This container will display the predictions -->
+            <p>Classification Prediction: <span id="classification-prediction"></span></p>
+            <p>Regression Prediction: <span id="regression-prediction"></span></p>
+            <p> <span id="hole-prediction"></span></p>
             <div id="predictions-container">
 
             </div>
@@ -133,10 +169,13 @@ function putLabels() {
     .then(data => {
         console.log(data);
         if (data){
-            document.getElementById('predictions-container').innerText = data
+            document.getElementById('classification-prediction').innerText = data.classification_pred.join(', ');
+            document.getElementById('regression-prediction').innerText = data.regression_pred.join(', ');
+            document.getElementById('hole-prediction').innerText = data.hole_pred.toString();
         }
     })
     .catch(error => console.error('Error:', error));
+
 }
 function getCookie(name) {
     let cookieValue = null;

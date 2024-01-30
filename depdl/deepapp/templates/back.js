@@ -1,3 +1,5 @@
+import * as d3 from 'd3'
+
 
 
 function startNeuralNetwork(){
@@ -29,10 +31,13 @@ function putLabels() {
     .then(data => {
         console.log(data);
         if (data){
-            document.getElementById('predictions-container').innerText = data
+            document.getElementById('classification-prediction').innerText = data.classification_pred.join(', ');
+            document.getElementById('regression-prediction').innerText = data.regression_pred.join(', ');
+            document.getElementById('hole-prediction').innerText = data.hole_pred.toString();
         }
     })
     .catch(error => console.error('Error:', error));
+
 }
 function getCookie(name) {
     let cookieValue = null;
