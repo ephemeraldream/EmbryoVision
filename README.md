@@ -1,6 +1,6 @@
 # High-Precision Embryological Image Analysis with Deep Learning
 
-## *THE PROJECT IS UNDER CONSTRUCTION!.*
+## *THE PROJECT IS UNDER CONSTRUCTION!. COMING SOON: WEB DEPLOYMENT*
 
 ### A complete Web Aplication for Recognition of Human Embryos.
 
