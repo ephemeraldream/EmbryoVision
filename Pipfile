@@ -9,6 +9,7 @@ django-rest-framework = "*"
 torch = "2.1.2"
 torchvision = "0.16.2"
 drf-spectacular = "*"
+psycopg2-binary = "*"
 
 [dev-packages]
 
