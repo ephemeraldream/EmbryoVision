@@ -1,6 +1,6 @@
 # High-Precision Embryological Image Analysis with Deep Learning
 
-### A complete Web Aplication for EmbryoImage Recognition.
+### A complete Web Aplication for Recognition of Human Embryos.
 
 ## Introduction
 
@@ -16,14 +16,14 @@ Our proprietary dataset, sourced directly from a Russian embryological lab, pres
 
 The MODCNN's design is tailored to embryological image analysis, diverging into specialized branches for detection and classification. We also experiment with YOLOv7's real-time object detection and the potential of transformer-based models known for capturing complex data patterns.
 
-![Embryological Image](https://github.com/ephemeraldream/EmbryoVision/blob/main/utils/photo_2024-01-29_23-29-05.jpg)
+![Embryological Image](https://github.com/ephemeraldream/EmbryoVision/blob/main/utils/4948resized.jpg)
 
 ## Materials and Methods
 
 Development takes place in the laboratory of LLC "WESTTRADE LTD". The raw data collection was conducted in the ART (Assisted Reproductive Technologies) laboratory of the "Family" medical center (Ufa, Russia). The visual information on the preimplantation development of human embryos up to the blastocyst stage (0–6 days post-insemination) was obtained using the "EmbryoViewer" incubator with a time-lapse video recording system (LLC "WESTTRADE LTD", Russia). Embryo cultivation was performed individually in special WOW dish microwells (Vitrolife, Sweden and VivaVitro, China). The dataset was labeled using Label Studio Community Edition software. A recurrent convolutional neural network architecture was selected, and the model was trained on numerous images.
 
-![Embryological Image](https://github.com/ephemeraldream/EmbryoVision/blob/main/utils/photo_2024-01-29_23-29-05.jpg)
 
+![Embryological Image](https://github.com/ephemeraldream/EmbryoVision/blob/main/utils/mp2.png)
 ## Discussion
 
 Modern technologies enabling decision support systems in various medical fields are opening new horizons in assisted reproductive technologies, particularly in embryology. These technological solutions allow for manual or automatic construction of a human embryo's morphodynamic profile, a chronological vector of morphokinetic states based on time-lapse image series.
