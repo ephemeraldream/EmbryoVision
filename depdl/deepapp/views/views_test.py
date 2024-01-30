@@ -8,11 +8,11 @@ from torchvision.transforms.functional import pil_to_tensor
 from django.views.decorators.csrf import csrf_exempt
 
 from deepapp import cnn_model
-from .models import Image
+from ..models import Image
 from pathlib import Path
 
 model = cnn_model.EmbryoModel()
-model.load_state_dict(torch.load(Path(__file__).resolve().parent / "final_cnn_model"))
+model.load_state_dict(torch.load(Path(__file__).resolve().parent.parent / "final_cnn_model"))
 model.eval()
 
 
