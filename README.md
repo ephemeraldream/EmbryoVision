@@ -32,7 +32,7 @@ The prototype system for comparative assessment of implantation potential was de
 
 ## Technologies Used
 
-- **PyTorch**: For building and training state-of-the-art neural networks.
+- **PyTorch**: For building and training neural networks.
 - **Django + Svelte JS**: For deploying the web application that interfaces with the neural network models.
 
 ## Contact
@@ -44,7 +44,6 @@ For further inquiries or collaboration opportunities, feel free to reach out:
 
 ---
 
-*This project is a testament to the power of deep learning in enhancing the quality and efficiency of medical diagnostics and research.*
 
 
 
