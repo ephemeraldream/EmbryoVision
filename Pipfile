@@ -1,0 +1,16 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+django = "5.0.1"
+django-rest-framework = "*"
+torch = "2.1.2"
+torchvision = "0.16.2"
+drf-spectacular = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.11"
