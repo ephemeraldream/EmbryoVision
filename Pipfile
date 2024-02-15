@@ -6,11 +6,10 @@ name = "pypi"
 [packages]
 django = "5.0.1"
 django-rest-framework = "*"
-torch = "2.1.2"
-torchvision = "0.16.2"
 drf-spectacular = "*"
 psycopg2-binary = "*"
 drf-spectacular-sidecar = "*"
+daphne = "*"
 
 [dev-packages]
 
