@@ -15,4 +15,29 @@ services:
       retries: 3
     ports:
       - "5432:5432"
+    networks:
+      - embryo.network
 
+
+  api:
+    container_name: embryovision.api
+    build:
+      context: .
+      dockerfile: ./docker/backend.Dockerfile
+    entrypoint: /code/backend/docker/entrypoint.sh
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+      - API_PORT=8000
+      - PYTHONPATH=.
+      - SECRET_KEY=django-insecure-9-ydi!@o-4y8omqth(wdwy+_vf8y+b8xvxtw0b8x%vo&hic+co
+      - DEBUG=True
+    networks:
+      - embryo.network
+
+networks:
+  embryo.network:

@@ -25,7 +25,7 @@ SECRET_KEY = "django-insecure-9-ydi!@o-4y8omqth(wdwy+_vf8y+b8xvxtw0b8x%vo&hic+co
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["81.200.147.112", "localhost"]
 
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [
@@ -86,10 +86,13 @@ DATABASES = {
         "NAME": "embryovision",
         "USER": "cyberbiba2000",
         "PASSWORD": "12345",
-        "HOST": "localhost",
+        "HOST": os.environ.get("DB_HOST", "localhost"),
         "PORT": 5432,
     },
 }
+
+STATIC_URL = "static/"
+STATIC_ROOT = BASE_DIR.joinpath("www").joinpath("public")  # TODO: проверить, что работает
 
 
 # Password validation
