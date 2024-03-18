@@ -27,7 +27,7 @@ class AttentionBlock(nn.Module):
         self.query = nn.Linear(in_features, out_features)
         self.key = nn.Linear(in_features, out_features)
         self.value = nn.Linear(in_features, out_features)
-        self.scale = torch.nn.Parameter(torch.sqrt(torch.FloatTensor([out_features])))
+        self.scale = torch.nn.Parameter(torch.sqrt(torch.FloatTensor([out_features])), requires_grad=False )
 
     def forward(self, x):
         Q = self.query(x)
