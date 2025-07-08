@@ -40,36 +40,7 @@ graph TB
     M --> K
 ```
 
-## 🛠️ Technology Stack
 
-### Core ML/AI
-- **YOLOv8**: Real-time embryo detection and localization
-- **ViT-B/32**: Transformer-based quality classification
-- **PyTorch**: Deep learning framework
-- **ONNX**: Cross-platform model optimization
-- **TensorRT**: GPU acceleration for inference
-- **OpenVINO**: Edge deployment optimization
-
-### Backend & Infrastructure
-- **FastAPI**: High-performance async API framework
-- **Pydantic**: Data validation and settings management
-- **Redis**: Caching and message queuing
-- **Celery**: Distributed task processing
-- **PostgreSQL**: Metadata and annotations storage
-
-### MLOps & Monitoring
-- **MLflow**: Experiment tracking and model registry
-- **Weights & Biases**: Advanced experiment monitoring
-- **Prometheus**: Metrics collection
-- **Grafana**: Observability and alerting
-- **Structlog**: Structured logging
-
-### DevOps & Deployment
-- **Poetry**: Dependency management
-- **Docker**: Containerization
-- **Kubernetes**: Orchestration
-- **Ansible**: Configuration management
-- **GitHub Actions**: CI/CD pipeline
 
 ## 🚀 Quick Start
 
@@ -79,36 +50,6 @@ graph TB
 - CUDA 11.8+ (for GPU acceleration)
 - Docker & Docker Compose
 - Poetry (recommended)
-
-### Installation
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/username/EmbryoVision.git
-   cd EmbryoVision
-   ```
-
-2. **Install dependencies with Poetry**
-   ```bash
-   poetry install
-   poetry shell
-   ```
-
-3. **Set up environment variables**
-   ```bash
-   cp .env.example .env
-   # Edit .env with your configuration
-   ```
-
-4. **Download pre-trained models**
-   ```bash
-   poetry run python scripts/download_models.py
-   ```
-
-5. **Start the development server**
-   ```bash
-   poetry run uvicorn app.main:app --reload --port 8000
-   ```
 
 ### Docker Deployment
 
@@ -293,24 +234,8 @@ poetry run pytest tests/performance/
 - Update documentation for new features
 - Ensure all CI checks pass
 
-## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🔗 Links
-
-- **Documentation**: [https://embryovision.readthedocs.io](https://embryovision.readthedocs.io)
-- **Docker Hub**: [https://hub.docker.com/r/username/embryovision](https://hub.docker.com/r/username/embryovision)
-- **Issue Tracker**: [https://github.com/username/EmbryoVision/issues](https://github.com/username/EmbryoVision/issues)
-
-## 👨‍💻 Author
-
-**Eduard Akinfiev**
-- Email: [akinfiev@arizona.edu](mailto:akinfiev@arizona.edu)
-- Telegram: [@immanentdream](https://t.me/immanentdream)
-- GitHub: [@username](https://github.com/username)
-
----
 
 *Built with ❤️ for advancing reproductive medicine through AI*
 
