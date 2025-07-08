@@ -1,43 +1,208 @@
-version: "3"
+version: '3.8'
 
 services:
-  db:
-    image: postgres:15.4
-    container_name: embryovision.db
-    environment:
-      - POSTGRES_USER=cyberbiba2000
-      - POSTGRES_PASSWORD=12345
-      - POSTGRES_DB=embryovision
-    healthcheck:
-      test: ["CMD-SHELL", "PGPASSWORD=$$POSTGRES_PASSWORD psql -U $$POSTGRES_USER -h db -lqt | grep -wo $$POSTGRES_DB || exit 1"]
-      interval: 5s
-      timeout: 5s
-      retries: 3
-    ports:
-      - "5432:5432"
-    networks:
-      - embryo.network
-
-
+  # Main FastAPI application
   api:
-    container_name: embryovision.api
     build:
       context: .
-      dockerfile: ./docker/backend.Dockerfile
-    entrypoint: /code/backend/docker/entrypoint.sh
+      dockerfile: docker/Dockerfile
+    container_name: embryovision-api
     ports:
       - "8000:8000"
-    depends_on:
-      - db
     environment:
-      - DB_HOST=db
-      - DB_PORT=5432
-      - API_PORT=8000
-      - PYTHONPATH=.
-      - SECRET_KEY=django-insecure-9-ydi!@o-4y8omqth(wdwy+_vf8y+b8xvxtw0b8x%vo&hic+co
-      - DEBUG=True
+      - EMBRYOVISION_DEBUG=false
+      - EMBRYOVISION_REDIS_URL=redis://redis:6379
+      - EMBRYOVISION_MONITORING_ENABLED=true
+      - EMBRYOVISION_USE_TENSORRT=true
+      - EMBRYOVISION_DEVICE=cuda
+    volumes:
+      - ./models:/app/models
+      - ./data:/app/data
+    depends_on:
+      - redis
+      - prometheus
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    restart: unless-stopped
     networks:
-      - embryo.network
+      - embryovision-network
+
+  # Redis for caching and queuing
+  redis:
+    image: redis:7-alpine
+    container_name: embryovision-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    networks:
+      - embryovision-network
+
+  # Celery worker for background tasks
+  celery-worker:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: embryovision-worker
+    command: celery -A app.core.celery worker --loglevel=info
+    environment:
+      - EMBRYOVISION_REDIS_URL=redis://redis:6379
+      - EMBRYOVISION_DEVICE=cuda
+    volumes:
+      - ./models:/app/models
+      - ./data:/app/data
+    depends_on:
+      - redis
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    restart: unless-stopped
+    networks:
+      - embryovision-network
+
+  # Prometheus monitoring
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: embryovision-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./deployments/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    restart: unless-stopped
+    networks:
+      - embryovision-network
+
+  # Grafana dashboards
+  grafana:
+    image: grafana/grafana:latest
+    container_name: embryovision-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./deployments/grafana/provisioning:/etc/grafana/provisioning
+      - ./deployments/grafana/dashboards:/var/lib/grafana/dashboards
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+    networks:
+      - embryovision-network
+
+  # MLflow tracking server
+  mlflow:
+    image: python:3.10-slim
+    container_name: embryovision-mlflow
+    ports:
+      - "5000:5000"
+    command: >
+      bash -c "
+        pip install mlflow psycopg2-binary &&
+        mlflow server 
+        --host 0.0.0.0 
+        --port 5000 
+        --default-artifact-root /mlflow/artifacts
+        --backend-store-uri sqlite:///mlflow/mlflow.db
+      "
+    volumes:
+      - mlflow_data:/mlflow
+    restart: unless-stopped
+    networks:
+      - embryovision-network
+
+  # Jupyter Lab for experimentation
+  jupyter:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.jupyter
+    container_name: embryovision-jupyter
+    ports:
+      - "8888:8888"
+    environment:
+      - JUPYTER_ENABLE_LAB=yes
+      - JUPYTER_TOKEN=embryovision
+    volumes:
+      - ./notebooks:/home/jovyan/work
+      - ./models:/home/jovyan/models
+      - ./data:/home/jovyan/data
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    restart: unless-stopped
+    networks:
+      - embryovision-network
+
+  # Nginx reverse proxy
+  nginx:
+    image: nginx:alpine
+    container_name: embryovision-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deployments/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./deployments/nginx/ssl:/etc/nginx/ssl
+    depends_on:
+      - api
+      - grafana
+      - mlflow
+    restart: unless-stopped
+    networks:
+      - embryovision-network
+
+  # Model optimization service
+  optimizer:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.optimizer
+    container_name: embryovision-optimizer
+    environment:
+      - EMBRYOVISION_DEVICE=cuda
+      - EMBRYOVISION_USE_TENSORRT=true
+      - EMBRYOVISION_USE_OPENVINO=true
+    volumes:
+      - ./models:/app/models
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    restart: "no"
+    networks:
+      - embryovision-network
+
+volumes:
+  redis_data:
+  prometheus_data:
+  grafana_data:
+  mlflow_data:
 
 networks:
-  embryo.network:
+  embryovision-network:
+    driver: bridge 
